@@ -1,0 +1,45 @@
+/* css reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Times New Roman';
+}
+/*
+container should have a height of 300px and width of 200px 
+each course unit should have a border 
+Test should be in the center 
+Should use flex layout for the Available Course and Selected Course,
+should leave some space at the edge of the page even children of the list should have a different background color 
+(rgb(221, 239, 221) in demo) 
+When height is overflow,you should enable scrolling
+*/
+.courseHeader{
+     margin: auto;
+     padding: auto;
+     text-align: center;
+     font-size: 24pt;
+}
+.Course{
+     
+}
+#leftContainer, #rightContainer {
+     width: 200px;
+     height: 300px;
+}
+ul{
+     overflow: auto;
+}
+ul li{
+     display: flex;
+     border: 2px black;
+     background-color: white;
+}
+ul li:nth-child(2n){
+     background-color:rgb(221, 239, 221);
+}
+
+.SelectButton{
+     font-size: 15pt;
+     padding: 10px 20px;
+}
