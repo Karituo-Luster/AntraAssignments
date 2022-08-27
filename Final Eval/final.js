@@ -136,7 +136,7 @@ const Controller = ((model, view) =>{
                                    lis[i].parentNode.removeChild(lis[i]);
                          });
                     }
-                    button.disable();
+                    document.getElementsByClassName("select-button").disabled = true;
                }
           });
      }
