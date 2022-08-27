@@ -24,10 +24,11 @@ body{
      text-align: center;
      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
-.CourseSignUp{
+.course-signup{
      display: flex;
 }
-#LeftContainer, #RightContainer {
+/*Done*/
+#left-container, #right-container {
      width: 200px;
      height: 300px;
      margin: auto;
@@ -37,8 +38,11 @@ body{
      overflow: auto;
 }
 ul li{
+     margin: auto;
+     padding: auto;
      border: 2px black;
      background-color: white;
+     font-size: 12pt;;
 }
 ul li:nth-child(2n){
      background-color:rgb(221, 239, 221);
@@ -50,7 +54,7 @@ ul li:nth-child(2n){
      display: inline-flex;
 }
 /*Done*/
-.SelectButton{
+.select-button{
      font-size: 15pt;
      padding: 0px 2px;
      margin-left: 10px;

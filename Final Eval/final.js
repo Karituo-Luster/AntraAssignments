@@ -1,54 +1,18 @@
 /* API */
 const Api = (() =>{
-     const baseURL = 'http://localhost:4232';
-     const path = 'courseList';
-
-     const getCourses = fetch([baseURL, path].join('/')).then((response) => response.json());
+     const URL = 'http://localhost:4232/courseList';
+     const  getCourses = fetch(URL).then((response) => response.json());
 
      return {
           getCourses,
      };
 })();
 /**********************************************************/
-/* View */
-const View = (() =>{
-     //All objects required for this project
-     const blocks = {
-          courseList: "coursesList",
-          leftContainer: '#leftContainer',
-          rightContainer: '#rightContainer',
-          courses: '.courses',
-     };
-     const render = (ele, tmp) => {
-          ele.innerHTML = tmp;
-     };
-     //Set all courses in the left container
-     const createTmp = (arr) => {
-          let tmp, required = '';
-          arr.forEach((course) => {
-               if(course.required === true){
-                    required = 'Compulsory';
-               }
-               else{
-                    required = 'Elective';
-               }
-               tmp+= '<li> <span>${course.courseName} - ${course.required} - Credits: ${course.credit}</span> </li>';
-          });
-          return tmp;
-     }
-
-     return {
-          blocks,
-          render,
-          createTmp,
-     };
-})();
-
 /* Model */
 const Model = ((api, view) =>{
      //individual courses
-     class Course{
-          constructor(courseName){
+     class IndividualCourse{
+          constructor(courseId, courseName, required, credit){
                this.courseId = courseId;
                this.courseName = courseName;
                this.required = required;
@@ -57,28 +21,54 @@ const Model = ((api, view) =>{
      }
      class State{
           //Create array for list of courses
-          #courses = [];
-          #selectedCourses = [];
-
+          #courseList = [];
           get courseList(){
-               return this.#courses;
+               return this.#courseList;
           }
-          //Place all courses into the left container
+          /*   Place all courses into the left container
+               Uses view.render & view.createVisualElement to show courses
+          */
           set courseList(newCourseList){
-               this.#courses = [...newCourseList];
+               this.#courseList = [...newCourseList];
                const leftContainer = document.querySelector(view.blocks.leftContainer);
-               const tmp = view.createTmp(this.#courses);
+               const tmp = view.createVisualElement(this.#courseList);
                view.render(leftContainer, tmp);
           }
      }
-     const {getCourses,} = api;
-
+     const {getCourses} = api;
      return{
-          getCourses,
-          Course,
           State,
+          getCourses,
      };
 })(Api, View);
+
+/* View */
+const View = (() =>{
+     //All objects required for this project
+     const blocks = {
+          leftContainer: '#left-container',
+          rightContainer: '#right-container',
+          creditHours: '.credit-hour-display',
+          selectButton: '.select-button',
+     };
+     function render(ele, tmp) {
+          ele.innerHTML = tmp;
+     }
+     //creates the list elements
+     function createVisualElement(arr) {
+          let tmp = '';
+          arr.forEach((course) => {
+               tmp += '<li class="course"><span>${course.courseName}\nCourse Type: ${course.required ? "Compulsory" : "Elective"}\nCredits: ${course.credit}</span></li>';
+          });
+          return tmp;
+     }
+
+     return {
+          blocks,
+          render,
+          createVisualElement,
+     };
+})();
 
 /* Controller 
 When user select course, the credit of that course should be add up to the total credit counter
@@ -95,21 +85,71 @@ After User successfully selected all the courses, "Select" button should be disa
 */
 const Controller = ((model, view) =>{
      const state = new model.State();
-     let creditHours = 0;
-     if(creditHours > 18){
-          alert("You can only choose up to 18 credits in one semester.");
-     }
-     
+     let selectedCourses = [];
+     let credit = 0;
 
-     const init = () => {
-          model.getCourses().then((course) => {
-               state.courseList = [...course.reverse()];
+     const cred = () =>{
+          const cred = document.querySelector(view.blocks.creditHours);
+          cred.addEventListener("click", (event) =>{
+               document.getElementsByClassName("credit-hour-display").innerHTML = credit;
+          })
+     }
+     function selectingCourse() {
+          const Left = document.querySelector(view.blocks.leftContainer);
+          Left.addEventListener("click", (event) => {
+               if (event.target.courseList.contains("courseItem")) {
+                    let classList = event.target.classList;
+                    let course = state.courseList.find((elem) => elem.courseId == event.target.id);
+               }
+               if (classList.contains("selected")) {
+                    selectedCourses = selectedCourses.filter((elem) => {
+                         return elem.courseId != course.courseId;
+                    });
+                    credit -= course.credit;
+                    event.target.classList.remove("selected");
+               }
+               else {
+                    if (totalcredit + course.credit > 18) {
+                         alert("You cannot register for more than 18 hours per semester.");
+                    }
+                    else {
+                         document.getElementsByClassName("course").style.backgroundColor = skyblue;
+                         selectedCourses.push(course);
+                         credit += course.credit;
+                         event.target.classList.add("selected");
+                         document.getElementsByClassName("credit-hour-display").innerHTML = credit;
+                    }
+               }
           });
-     };
-     const bootstrap = () => {
-          init();
      }
-
+     function finalizeButton() {
+          const button = document.querySelector(view.blocks.selectButton);
+          button.addEventListener("click", (event) => {
+               confirm("You have chosen "+ credit +" credits this selester. You cannot change once you submit. Do you want to continue?");
+               if (credit <= 18 && confirm === true) {
+                    let lis = document.querySelectorAll(".course");
+                    for (let i = 0; i < lis.length; i++) {
+                         let name = lis[i].getElementsByClassName('name')[0].innerHTML;
+                         let t = lis[i].innerHTML;
+                         selectedCourses.forEach((selectedCourse) => {
+                              if (selectedCourse.courseName === name)
+                                   lis[i].parentNode.removeChild(lis[i]);
+                         });
+                    }
+                    button.disable();
+               }
+          });
+     }
+     function init() {
+          model.getCourses().then((course) => {
+               state.courseList = course;
+          });
+     }
+     function bootstrap() {
+          init();
+          selectingCourse();
+          finalizeButton();
+     }
      return{
           bootstrap,
      };
