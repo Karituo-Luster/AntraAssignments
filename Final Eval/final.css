@@ -42,7 +42,8 @@ ul li{
      padding: auto;
      border: 2px black;
      background-color: white;
-     font-size: 12pt;;
+     list-style-type: none;
+     font-size: 12pt;
 }
 ul li:nth-child(2n){
      background-color:rgb(221, 239, 221);
