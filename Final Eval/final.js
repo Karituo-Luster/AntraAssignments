@@ -1,47 +1,13 @@
 /* API */
 const Api = (() =>{
-     const URL = 'http://localhost:4232/courseList';
-     const  getCourses = fetch(URL).then((response) => response.json());
+     const URL = "http://localhost:4232/courseList";
+     const getCourses = () => fetch(URL).then((response) => response.json());
 
      return {
           getCourses,
      };
 })();
 /**********************************************************/
-/* Model */
-const Model = ((api, view) =>{
-     //individual courses
-     class IndividualCourse{
-          constructor(courseId, courseName, required, credit){
-               this.courseId = courseId;
-               this.courseName = courseName;
-               this.required = required;
-               this.credit = credit;
-          }
-     }
-     class State{
-          //Create array for list of courses
-          #courseList = [];
-          get courseList(){
-               return this.#courseList;
-          }
-          /*   Place all courses into the left container
-               Uses view.render & view.createVisualElement to show courses
-          */
-          set courseList(newCourseList){
-               this.#courseList = [...newCourseList];
-               const leftContainer = document.querySelector(view.blocks.leftContainer);
-               const tmp = view.createVisualElement(this.#courseList);
-               view.render(leftContainer, tmp);
-          }
-     }
-     const {getCourses} = api;
-     return{
-          State,
-          getCourses,
-     };
-})(Api, View);
-
 /* View */
 const View = (() =>{
      //All objects required for this project
@@ -57,8 +23,8 @@ const View = (() =>{
      //creates the list elements
      function createVisualElement(arr) {
           let tmp = '';
-          arr.forEach((course) => {
-               tmp += '<li class="course"><span>${course.courseName}\nCourse Type: ${course.required ? "Compulsory" : "Elective"}\nCredits: ${course.credit}</span></li>';
+          arr.forEach(() => {
+               tmp += '<li class="course"><span>${course.courseName}<br>Course Type: ${course.required ? "Compulsory" : "Elective"}<br>Credits: ${course.credit}</span></li>';
           });
           return tmp;
      }
@@ -69,6 +35,33 @@ const View = (() =>{
           createVisualElement,
      };
 })();
+
+/* Model */
+const Model = ((api, view) =>{
+     //individual courses
+     class State{
+          //Create array for list of courses
+          #courseList = [];
+
+          get courseList(){
+               return this.#courseList;
+          }
+          /*   Place all courses into the left container
+               Uses view.render & view.createVisualElement to show courses
+          */
+          set courseList(...newCourseList){
+               this.#courseList = [...newCourseList];
+               const leftContainer = document.querySelector(view.blocks.leftContainer);
+               const tmp = view.createVisualElement(this.#courseList);
+               view.render(leftContainer, tmp);
+          }
+     }
+     const { getCourses } = api;
+     return{
+          State,
+          getCourses,
+     };
+})(Api, View);
 
 /* Controller 
 When user select course, the credit of that course should be add up to the total credit counter
@@ -88,18 +81,10 @@ const Controller = ((model, view) =>{
      let selectedCourses = [];
      let credit = 0;
 
-     const cred = () =>{
-          const cred = document.querySelector(view.blocks.creditHours);
-          cred.addEventListener("click", (event) =>{
-               document.getElementsByClassName("credit-hour-display").innerHTML = credit;
-          })
-     }
      function selectingCourse() {
           const Left = document.querySelector(view.blocks.leftContainer);
           Left.addEventListener("click", (event) => {
                if (event.target.courseList.contains("courseItem")) {
-                    let classList = event.target.classList;
-                    let course = state.courseList.find((elem) => elem.courseId == event.target.id);
                }
                if (classList.contains("selected")) {
                     selectedCourses = selectedCourses.filter((elem) => {
@@ -124,13 +109,12 @@ const Controller = ((model, view) =>{
      }
      function finalizeButton() {
           const button = document.querySelector(view.blocks.selectButton);
-          button.addEventListener("click", (event) => {
+          button.addEventListener("click", () => {
                confirm("You have chosen "+ credit +" credits this selester. You cannot change once you submit. Do you want to continue?");
                if (credit <= 18 && confirm === true) {
                     let lis = document.querySelectorAll(".course");
                     for (let i = 0; i < lis.length; i++) {
                          let name = lis[i].getElementsByClassName('name')[0].innerHTML;
-                         let t = lis[i].innerHTML;
                          selectedCourses.forEach((selectedCourse) => {
                               if (selectedCourse.courseName === name)
                                    lis[i].parentNode.removeChild(lis[i]);
