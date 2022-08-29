@@ -1,6 +1,6 @@
 /* API */
 const Api = (() =>{
-     const URL = "http://localhost:4232/courseList";
+     const URL = 'http://localhost:4232/courseList';
      const getCourses = () => fetch(URL).then((response) => response.json());
 
      return {
@@ -109,7 +109,7 @@ const Controller = ((model, view) =>{
      }
      function finalizeButton() {
           const button = document.querySelector(view.blocks.selectButton);
-          button.addEventListener("click", () => {
+          button.addEventListener("click", (event) => {
                confirm("You have chosen "+ credit +" credits this selester. You cannot change once you submit. Do you want to continue?");
                if (credit <= 18 && confirm === true) {
                     let lis = document.querySelectorAll(".course");
